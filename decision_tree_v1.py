@@ -20,9 +20,14 @@ class TreeNode(object):
         self.children = [child for child in self.children if child is not child_node] 
 
 def print_tree(root_node):
+   
     print(f"\nNode: {root_node.value}, Children: ", end = "")
-    for child in root_node.children:
-        print(child.value + "  ", end ="")
+    
+    if(len(root.children) > 0):
+        for child in root_node.children:
+            print(child.value + "  ", end ="")        
+    else:    
+        print(f"None")
 
     for child in root_node.children:
         if(len(child.children) > 0):
@@ -43,14 +48,9 @@ child_node2.add_child_node(child_node4)
 print_tree(root)
 '''
 
-# attributes
+# attributes (Note: 'play' is our target attribute/class)
 attributes = { 'outlook' : ['sunny', 'overcast', 'rainy'], 'temperature' : ['hot', 'mild', 'cool'], 'humidity' : ['high', 'normal'], 'wind' : ['weak', 'strong'], 'play' : ['no', 'yes'] }
-# attribute values (play is the target attribute/class)
-#play = ['no', 'yes']
-#outlook = ['sunny', 'overcast', 'rainy']
-#temperature = ['hot', 'mild', 'cool']
-#humidity = ['high', 'normal']
-#wind = ['weak', 'strong']
+
 
 # function for computing the entropy 'H' of a given set S
 #  where H := sum_i (p_i log2(p_i)), where the index runs over distinct values of S and p_i is the proportion of the ith value in the set
@@ -84,25 +84,24 @@ def create_partitions(S, attribute):
     partitions = {}
     for val in S_attribute_vals:
         #print(f"{val} count: {S_attribute.count(val)}")
-        partitions[val] = {'instances' : [], 'entropy' : 0.0}
+        partitions[val] = [] 
 
     # create partitions and compute entropy of each partition
     for instance in S:
-        partitions[instance[attribute]]['instances'].append(instance)
+        partitions[instance[attribute]].append(instance)
    
     for partition in partitions:
         print(f"{partition} : ", end="")
-        for instance in partitions[partition]['instances']:
+        for instance in partitions[partition]:
             print(instance['id'] + "  ", end="")
         print("")
-    #print("\n Partitions: \n", partitions)   
+
     # compute information gain and split-information
     gain = entropy(S)
     split_info = 0.0
     for partition in partitions:
-        p_s = len(partitions[partition]['instances']) / len(S)
-        partitions[partition]['entropy'] = entropy(partitions[partition]['instances'])
-        gain -= p_s * partitions[partition]['entropy'] 
+        p_s = len(partitions[partition]) / len(S)
+        gain -= p_s * entropy(partitions[partition]) 
         split_info -= p_s * log2(p_s)
 
     gain_ratio = gain / split_info
@@ -110,7 +109,7 @@ def create_partitions(S, attribute):
 
 # training_data is a list of instances, each instance is a list of attributes with the target class at the end
 # instance = [Outlook, Temperature, Humidity, Wind, Play (target class)]
-training_data = [ {'id' : 'a', 'outlook' : attributes['outlook'][0],'temperature' : attributes['temperature'][0],'humidity' : attributes['humidity'][0], 'wind' : attributes['wind'][0], 'play' : attributes['play'][0]},
+training_data = [ {'id' : 'a', 'outlook' : attributes['outlook'][0],'temperature' : attributes['temperature'][0],'humidity' : attributes        ['humidity'][0], 'wind' : attributes['wind'][0], 'play' : attributes['play'][0]},
                   {'id' : 'b', 'outlook' : attributes['outlook'][0],'temperature' : attributes['temperature'][0],'humidity' : attributes['humidity'][0], 'wind' : attributes['wind'][1], 'play' : attributes['play'][0]},
                   {'id' : 'c', 'outlook' : attributes['outlook'][1],'temperature' : attributes['temperature'][0],'humidity' : attributes['humidity'][0], 'wind' : attributes['wind'][0], 'play' : attributes['play'][1]},
                   {'id' : 'd', 'outlook' : attributes['outlook'][2],'temperature' : attributes['temperature'][1],'humidity' : attributes['humidity'][0], 'wind' : attributes['wind'][0], 'play' : attributes['play'][1]},
@@ -129,20 +128,31 @@ training_data = [ {'id' : 'a', 'outlook' : attributes['outlook'][0],'temperature
 # ID3 algorithm #
 #################
 
-# root set
+# root node selection 
 S = training_data
-print(f"Entropy(S) = {entropy(S)}")
 
 #########################
 # choose best attribute #
 #########################
 
-# first partitions for each attribute
-#outlook_partitions, outlook_gain_ratio = create_partitions(S, 'outlook')
-#print(f"Outlook gain ratio: {outlook_gain_ratio}")
-#humidity_partitions, humidity_gain_ratio = create_partitions(S, 'humidity')
-#print(f"Humidity gain ratio: {humidity_gain_ratio}")
-
+# create partitions for each attribute and find the best attribute
+attribute_partitions = {}
+max_GR = 0.0
+best_attribute = None
 for attribute in {attribute for attribute in attributes if attribute is not 'play'}:
     partitions, gain_ratio = create_partitions(S, attribute)
+    attribute_partitions[attribute] = partitions
     print(f"{attribute} gain ratio: {gain_ratio}")   
+    if(gain_ratio > max_GR):
+        best_attribute = attribute
+        max_GR = gain_ratio
+
+partitions = attribute_partitions[best_attribute]
+print(f"Best attribute: {best_attribute}")     
+
+# create the root node
+root = TreeNode(best_attribute) 
+print_tree(root)
+
+# iterate over each new partition, and test condition for further partitioning
+
