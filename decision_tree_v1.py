@@ -10,12 +10,13 @@ from math import log2
 
 class TreeNode(object):
 
-    def __init__(self, value):
+    def __init__(self, value, branch = None):
         self.value = value
+        self.branch = branch
         self.children = []
 
     def add_child_node(self, child_node):
-        print(f"Adding child_node with value: {child_node.value}")
+        print(f"Adding child_node with value: '{child_node.value}' from branch: '{child_node.branch}'")
         self.children.append(child_node)
 
     def remove_child_node(self, child_node):
@@ -197,13 +198,13 @@ def ID3(S, attributes_remaining, root_node):
                 leaf = 'no'     
 
             # add leaf node
-            child_node = TreeNode(leaf)
+            child_node = TreeNode(value = leaf, branch = partition)
             root_node.add_child_node(child_node)
 
         else:
 
             # add child node
-            child_node = TreeNode(partition)
+            child_node = TreeNode(value = partition, branch = partition)
             print("\n############################")
             root_node.add_child_node(child_node)
             print("############################")
