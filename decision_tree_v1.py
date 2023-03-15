@@ -36,6 +36,7 @@ def print_tree(root_node):
             print_tree(child)
         else:
             print(f"\nNode: {child.value}, Children: None", end = "")
+    print("")
 
 '''
 root = TreeNode('root')
@@ -52,21 +53,27 @@ print_tree(root)
 
 # attributes (Note: 'play' is our target attribute/class)
 attributes = { 'outlook' : ['sunny', 'overcast', 'rainy'], 'temperature' : ['hot', 'mild', 'cool'], 'humidity' : ['high', 'normal'], 'wind' : ['weak', 'strong'], 'play' : ['no', 'yes'] }
-
+target_attribute = 'play'
 
 # function for computing the entropy 'H' of a given set S
 #  where H := sum_i (p_i log2(p_i)), where the index runs over distinct values of S and p_i is the proportion of the ith value in the set
 def entropy(S):
-    S_play = []
+    S_target = []
     for instance in S:
-        S_play.append(instance['play'])
+        S_target.append(instance[target_attribute])
     
-    S_vals = set(S_play) # all distinct vaues in S  
-    S_len = len(S_play) # total number of values in S
+    S_vals = set(S_target) # all distinct vaues in S  
+    S_len = len(S_target) # total number of values in S
     H = 0.0
     for val in S_vals:
-        p = S_play.count(val)/S_len # proportion of the distinct value
-        H -= p * log2(p)
+        p = S_target.count(val)/S_len # proportion of the distinct value
+
+        if(p == 0.0):
+            log2_p= 0.0
+        else:
+            log2_p = log2(p)
+        
+        H -= p * log2_p
     return H
 
 # function for creating partitions of the set S of instances according to the given attribute and computing the gain ratio for this partitioning
@@ -103,8 +110,14 @@ def create_partitions(S, attribute):
     split_info = 0.0
     for partition in partitions:
         p_s = len(partitions[partition]) / len(S)
-        gain -= p_s * entropy(partitions[partition]) 
-        split_info -= p_s * log2(p_s)
+        gain -= p_s * entropy(partitions[partition])
+        
+        if(p_s == 0.0):
+            log2_ps = 0.0
+        else:
+            log2_ps = log2(p_s) 
+
+        split_info -= p_s * log2_ps
 
     gain_ratio = gain / split_info
     return partitions, gain_ratio    
@@ -130,31 +143,81 @@ training_data = [ {'id' : 'a', 'outlook' : attributes['outlook'][0],'temperature
 # ID3 algorithm #
 #################
 
-# root node selection 
-S = training_data
 
 #########################
 # choose best attribute #
 #########################
 
-# create partitions for each attribute and find the best attribute
-attribute_partitions = {}
-max_GR = 0.0
-best_attribute = None
-for attribute in {attribute for attribute in attributes if attribute is not 'play'}:
-    partitions, gain_ratio = create_partitions(S, attribute)
-    attribute_partitions[attribute] = partitions
-    print(f"{attribute} gain ratio: {gain_ratio}")   
-    if(gain_ratio > max_GR):
-        best_attribute = attribute
-        max_GR = gain_ratio
 
-partitions = attribute_partitions[best_attribute]
-print(f"Best attribute: {best_attribute}")     
+def ID3(S, attributes_remaining, root_node):
 
-# create the root node
-root = TreeNode(best_attribute) 
-print_tree(root)
+    # create partitions for each attribute and find the best attribute
+    attribute_partitions = {}
+    max_GR = 0.0
+    best_attribute = None
+    for attribute in attributes_remaining:
+        partitions, gain_ratio = create_partitions(S, attribute)
+        attribute_partitions[attribute] = partitions
+        print(f"{attribute} gain ratio: {gain_ratio}")   
+        if(gain_ratio > max_GR):
+            best_attribute = attribute
+            max_GR = gain_ratio
 
-# iterate over each new partition, and test condition for further partitioning
+    partitions = attribute_partitions[best_attribute]
+    print(f"\nBest attribute is '{best_attribute}'")     
 
+    attributes_remaining.remove(best_attribute)
+
+    #print(partitions)
+    
+    # create the root node
+    root_node.value = best_attribute 
+
+    print_tree(root_node)
+
+
+    print(f"\nAttributes remaining: {attributes_remaining}\n")
+
+    # iterate over each new partition, and test condition for further partitioning
+    for partition in partitions:
+        H = entropy(partitions[partition]) 
+        print(f"Partition: {partition}, Entropy = {H}")
+
+        # stopping conditions: (1) if a partition has entropy = 0, it's a leaf
+        #                      (2) if no more attributes remaining  
+        if(H == 0.0 or len(attributes_remaining) == 0):
+            print("Found a zero entropy partition!")
+            play_vals = []
+            for instance in partitions[partition]:
+                play_vals.append(instance['play'])
+            print(f"play values: {play_vals}")
+            if (play_vals.count('yes') > play_vals.count('no')):
+                leaf = 'yes'
+            else:
+                leaf = 'no'     
+
+            # add leaf node
+            child_node = TreeNode(leaf)
+            root_node.add_child_node(child_node)
+
+        else:
+
+            # add child node
+            child_node = TreeNode(partition)
+            print("\n############################")
+            root_node.add_child_node(child_node)
+            print("############################")
+
+            # recursively call ID3 for further partitioning
+            ID3(partitions[partition], attributes_remaining, child_node)
+
+
+        print_tree(root)
+
+
+S = training_data
+root = TreeNode('root')
+attributes_remaining = [attribute for attribute in attributes if attribute is not target_attribute]
+
+print("\n### Building decision tree...\n")
+ID3(S, attributes_remaining, root)
