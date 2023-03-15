@@ -1,5 +1,7 @@
 '''
-    ID3 Decision Tree Implementation
+    Code Description: ID3 Decision Tree Implementation
+
+    Author: Tanzid Sultan
 '''
 
 import numpy as np
