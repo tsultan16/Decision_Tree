@@ -67,26 +67,23 @@ def entropy(S):
         H -= p * log2(p)
     return H
 
-# function for creating partitions of the set S of instances according to the given attribute
+# function for creating partitions of the set S of instances according to the given attribute and computing the gain ratio for this partitioning
 def create_partitions(S, attribute):
  
-    print("Set: ", end = "")
+    print("\nSet: ", end = "")
     for instance in S:
         print(instance['id'] + "  ", end = "")
     print("")    
-
-    print(f"Partitioning by '{attribute}' attribute")
+    print(f"Partitioning by '{attribute}' attribute:")
 
     S_attribute = []
     for instance in S:
         S_attribute.append(instance[attribute])
-    #print(S_attribute)
 
     S_attribute_vals = attributes[attribute]
     partitions = {}
-
     for val in S_attribute_vals:
-        print(f"{val} count: {S_attribute.count(val)}")
+        #print(f"{val} count: {S_attribute.count(val)}")
         partitions[val] = {'instances' : [], 'entropy' : 0.0}
 
     # create partitions and compute entropy of each partition
@@ -94,14 +91,22 @@ def create_partitions(S, attribute):
         partitions[instance[attribute]]['instances'].append(instance)
    
     for partition in partitions:
-        print(f"\n{partition} : ", end="")
+        print(f"{partition} : ", end="")
         for instance in partitions[partition]['instances']:
             print(instance['id'] + "  ", end="")
-
-        # compute the entropy
+        print("")
+    #print("\n Partitions: \n", partitions)   
+    # compute information gain and split-information
+    gain = entropy(S)
+    split_info = 0.0
+    for partition in partitions:
+        p_s = len(partitions[partition]['instances']) / len(S)
         partitions[partition]['entropy'] = entropy(partitions[partition]['instances'])
+        gain -= p_s * partitions[partition]['entropy'] 
+        split_info -= p_s * log2(p_s)
 
-    print("\n Partitions: \n", partitions)   
+    gain_ratio = gain / split_info
+    return partitions, gain_ratio    
 
 # training_data is a list of instances, each instance is a list of attributes with the target class at the end
 # instance = [Outlook, Temperature, Humidity, Wind, Play (target class)]
@@ -133,4 +138,11 @@ print(f"Entropy(S) = {entropy(S)}")
 #########################
 
 # first partitions for each attribute
-outlook_partitions = create_partitions(S, 'outlook')
+#outlook_partitions, outlook_gain_ratio = create_partitions(S, 'outlook')
+#print(f"Outlook gain ratio: {outlook_gain_ratio}")
+#humidity_partitions, humidity_gain_ratio = create_partitions(S, 'humidity')
+#print(f"Humidity gain ratio: {humidity_gain_ratio}")
+
+for attribute in {attribute for attribute in attributes if attribute is not 'play'}:
+    partitions, gain_ratio = create_partitions(S, attribute)
+    print(f"{attribute} gain ratio: {gain_ratio}")   
