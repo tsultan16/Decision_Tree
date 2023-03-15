@@ -108,7 +108,7 @@ target_attribute = 'play'
 
 # training_data is a list of instances, each instance is a list of attributes with the target class at the end
 # instance = [Outlook, Temperature, Humidity, Wind, Play (target class)]
-training_data = [ {'id' : 'a', 'outlook' : attributes['outlook'][0],'temperature' : attributes['temperature'][0],'humidity' : attributes        ['humidity'][0], 'wind' : attributes['wind'][0], 'play' : attributes['play'][0]},
+training_data = [ {'id' : 'a', 'outlook' : attributes['outlook'][0],'temperature' : attributes['temperature'][0],'humidity' : attributes['humidity'][0], 'wind' : attributes['wind'][0], 'play' : attributes['play'][0]},
                   {'id' : 'b', 'outlook' : attributes['outlook'][0],'temperature' : attributes['temperature'][0],'humidity' : attributes['humidity'][0], 'wind' : attributes['wind'][1], 'play' : attributes['play'][0]},
                   {'id' : 'c', 'outlook' : attributes['outlook'][1],'temperature' : attributes['temperature'][0],'humidity' : attributes['humidity'][0], 'wind' : attributes['wind'][0], 'play' : attributes['play'][1]},
                   {'id' : 'd', 'outlook' : attributes['outlook'][2],'temperature' : attributes['temperature'][1],'humidity' : attributes['humidity'][0], 'wind' : attributes['wind'][0], 'play' : attributes['play'][1]},
@@ -126,13 +126,6 @@ training_data = [ {'id' : 'a', 'outlook' : attributes['outlook'][0],'temperature
 #################
 # ID3 algorithm #
 #################
-
-
-#########################
-# choose best attribute #
-#########################
-
-
 def ID3(S, attributes_remaining, root_node):
 
     # create partitions for each attribute and find the best attribute
