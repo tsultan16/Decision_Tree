@@ -22,39 +22,19 @@ class TreeNode(object):
     def remove_child_node(self, child_node):
         self.children = [child for child in self.children if child is not child_node] 
 
-def print_tree(root_node):
+def print_tree(root_node, level):
    
-    print(f"\nNode: {root_node.value}, Children: ", end = "")
-    
-    if(len(root.children) > 0):
+    print(f"\nLevel: {level}, Node: {root_node.value}, Children: ", end = "")
+    if(len(root_node.children) > 0):
         for child in root_node.children:
-            print(child.value + "  ", end ="")        
+            print(child.value + "  ", end ="")  
+
+        for child in root_node.children:
+            print_tree(child, level+1)
+
     else:    
-        print(f"None")
+        print("None", end ="")
 
-    for child in root_node.children:
-        if(len(child.children) > 0):
-            print_tree(child)
-        else:
-            print(f"\nNode: {child.value}, Children: None", end = "")
-    print("")
-
-'''
-root = TreeNode('root')
-child_node1 = TreeNode('c1')
-child_node2 = TreeNode('c2')
-child_node3 = TreeNode('c3')
-child_node4 = TreeNode('c4')
-root.add_child_node(child_node1)
-root.add_child_node(child_node2)
-child_node2.add_child_node(child_node3)
-child_node2.add_child_node(child_node4)
-print_tree(root)
-'''
-
-# attributes (Note: 'play' is our target attribute/class)
-attributes = { 'outlook' : ['sunny', 'overcast', 'rainy'], 'temperature' : ['hot', 'mild', 'cool'], 'humidity' : ['high', 'normal'], 'wind' : ['weak', 'strong'], 'play' : ['no', 'yes'] }
-target_attribute = 'play'
 
 # function for computing the entropy 'H' of a given set S
 #  where H := sum_i (p_i log2(p_i)), where the index runs over distinct values of S and p_i is the proportion of the ith value in the set
@@ -123,6 +103,12 @@ def create_partitions(S, attribute):
     gain_ratio = gain / split_info
     return partitions, gain_ratio    
 
+
+# attributes (Note: 'play' is our target attribute/class)
+attributes = { 'outlook' : ['sunny', 'overcast', 'rainy'], 'temperature' : ['hot', 'mild', 'cool'], 'humidity' : ['high', 'normal'], 'wind' : ['weak', 'strong'], 'play' : ['no', 'yes'] }
+target_attribute = 'play'
+
+
 # training_data is a list of instances, each instance is a list of attributes with the target class at the end
 # instance = [Outlook, Temperature, Humidity, Wind, Play (target class)]
 training_data = [ {'id' : 'a', 'outlook' : attributes['outlook'][0],'temperature' : attributes['temperature'][0],'humidity' : attributes        ['humidity'][0], 'wind' : attributes['wind'][0], 'play' : attributes['play'][0]},
@@ -168,14 +154,9 @@ def ID3(S, attributes_remaining, root_node):
     print(f"\nBest attribute is '{best_attribute}'")     
 
     attributes_remaining.remove(best_attribute)
-
-    #print(partitions)
     
     # create the root node
     root_node.value = best_attribute 
-
-    print_tree(root_node)
-
 
     print(f"\nAttributes remaining: {attributes_remaining}\n")
 
@@ -212,13 +193,16 @@ def ID3(S, attributes_remaining, root_node):
             # recursively call ID3 for further partitioning
             ID3(partitions[partition], attributes_remaining, child_node)
 
+        #print_tree(root)
 
-        print_tree(root)
-
-
+# set of training instances
 S = training_data
+# create a root node for our decision tree
 root = TreeNode('root')
+
 attributes_remaining = [attribute for attribute in attributes if attribute is not target_attribute]
 
 print("\n### Building decision tree...\n")
 ID3(S, attributes_remaining, root)
+print("\n### Done!\n")
+print_tree(root_node = root, level = 0)
