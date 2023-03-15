@@ -3,10 +3,7 @@
 
     Author: Tanzid Sultan
 '''
-
-import numpy as np
 from math import log2
-
 
 class TreeNode(object):
 
