@@ -159,14 +159,20 @@ def ID3(S, attributes_remaining, root_node):
         #                      (2) if no more attributes remaining  
         if(H == 0.0 or len(attributes_remaining) == 0):
             print("Found a zero entropy partition!")
-            play_vals = []
+            target_vals = []
             for instance in partitions[partition]:
-                play_vals.append(instance['play'])
-            print(f"play values: {play_vals}")
-            if (play_vals.count('yes') > play_vals.count('no')):
-                leaf = 'yes'
-            else:
-                leaf = 'no'     
+                target_vals.append(instance[target_attribute])
+            print(f"target values: {target_vals}")
+
+            # find target attribute value with the highest count
+            max_count = 0
+            max_target_val = None
+            for val in attributes[target_attribute]:
+                if (target_vals.count(val) > max_count):
+                    max_target_val = val
+           
+            # assign target attribute value with the highest count as leaf node
+            leaf = max_target_val
 
             # add leaf node
             child_node = TreeNode(value = leaf, branch = partition)
