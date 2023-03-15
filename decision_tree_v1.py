@@ -160,7 +160,7 @@ def ID3(S, attributes_remaining, root_node):
 
     print(f"\nAttributes remaining: {attributes_remaining}\n")
 
-    # iterate over each new partition, and test condition for further partitioning
+    # iterate over each new partition, and test stopping condition for further partitioning
     for partition in partitions:
         H = entropy(partitions[partition]) 
         print(f"Partition: {partition}, Entropy = {H}")
@@ -186,9 +186,7 @@ def ID3(S, attributes_remaining, root_node):
 
             # add child node
             child_node = TreeNode(value = partition, branch = partition)
-            print("\n############################")
             root_node.add_child_node(child_node)
-            print("############################")
 
             # recursively call ID3 for further partitioning
             ID3(partitions[partition], attributes_remaining, child_node)
