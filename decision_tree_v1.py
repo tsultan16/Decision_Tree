@@ -21,7 +21,7 @@ class TreeNode(object):
 
 def print_tree(root_node, level):
    
-    print(f"\nLevel: {level}, Node: {root_node.value}, Children: ", end = "")
+    print(f"\nLevel: {level}, Node: {root_node.value}, Branch: {root_node.branch} , Children: ", end = "")
     if(len(root_node.children) > 0):
         for child in root_node.children:
             print(child.value + "  ", end ="")  
@@ -32,6 +32,45 @@ def print_tree(root_node, level):
     else:    
         print("None", end ="")
 
+
+# function for predicting the target attribute/class of an unclassified instance
+def classify(unclassified_instance, tree_root):
+
+    root = tree_root
+
+    print("\nUnclassified instance: \n",unclassified_instance)
+    
+    # make sure attribute data is valid
+    for attribute in unclassified_instance:
+        if(attribute not in [attribute for attribute in attributes]):
+            print("Invalid attribute name in unclassified instance data!")
+            return -1
+
+        if(unclassified_instance[attribute] not in attributes[attribute]):
+            print("Invalid attribute value name in unclassified instance data!")
+            return -1
+    
+    stop = False
+    while (not stop):
+
+        print(f"root.value: {root.value}")
+        print(f"root_children: {[child.value for child in root.children]}" ) 
+        print(f"root_children_branch: ", [child.branch for child in root.children])
+    
+        if(len(root.children) == 0):
+            print("Found a leaf node!")
+            prediction = root.value
+            stop = True
+        else:
+            print(f"Instance attribute : {root.value}, Value: {unclassified_instance[root.value]}")
+
+            child_index = [child.branch for child in root.children].index(unclassified_instance[root.value])
+            root = root.children[child_index]
+
+            print("\nTraversing tree to new root.\n")
+
+    print(f"Prediction: {prediction}")
+    return prediction
 
 # function for computing the entropy 'H' of a given set S
 #  where H := sum_i (p_i log2(p_i)), where the index runs over distinct values of S and p_i is the proportion of the ith value in the set
@@ -199,4 +238,10 @@ attributes_remaining = [attribute for attribute in attributes if attribute is no
 print("\n### Building decision tree...\n")
 ID3(S, attributes_remaining, root)
 print("\n### Done!\n")
+
+example_unclassified_instance = {'outlook' : 'rainy','temperature' : 'cool', 'humidity' : 'high', 'wind' : 'strong'}
+
 print_tree(root_node = root, level = 0)
+classify(example_unclassified_instance, root)
+
+
