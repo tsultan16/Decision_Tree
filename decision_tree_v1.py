@@ -156,6 +156,59 @@ def partition_by_best_attribute(S, attributes_remaining):
     partitions = attribute_partitions[best_attribute]
     return partitions, best_attribute
 
+#################
+# ID3 algorithm #
+#################
+def ID3(S, attributes_remaining, root_node):
+
+    # create partitions for each attribute and find the best attribute
+    partitions, best_attribute = partition_by_best_attribute(S, attributes_remaining)
+    attributes_remaining.remove(best_attribute)
+
+    print(f"\nBest attribute is '{best_attribute}'")     
+    print(f"\nAttributes remaining: {attributes_remaining}\n")
+    
+    # set the root node value to best attribute
+    root_node.value = best_attribute 
+
+    # iterate over each new partition, and test stopping condition for further partitioning
+    for partition in partitions:
+        H = entropy(partitions[partition]) 
+        print(f"Partition: {partition}, Entropy = {H}")
+
+        # stopping conditions: (1) if a partition has entropy = 0, it's a leaf
+        #                      (2) if no more attributes remaining  
+        if(H == 0.0 or len(attributes_remaining) == 0):
+            print("Found a zero entropy partition!")
+            target_vals = []
+            for instance in partitions[partition]:
+                target_vals.append(instance[target_attribute])
+            print(f"target values: {target_vals}")
+
+            # find target attribute value with the highest count
+            # (TO DO: need to decide what to do in case there's a tie between different attribute value counts)
+            max_count = 0
+            max_target_val = None
+            for val in attributes[target_attribute]:
+                if (target_vals.count(val) > max_count):
+                    max_target_val = val
+           
+            # assign target attribute value with the highest count as leaf node
+            leaf = max_target_val
+
+            # add leaf node
+            child_node = TreeNode(value = leaf, branch = partition)
+            root_node.add_child_node(child_node)
+
+        else:
+
+            # add child node
+            child_node = TreeNode(value = partition, branch = partition)
+            root_node.add_child_node(child_node)
+
+            # recursively call ID3 for further partitioning
+            ID3(partitions[partition], attributes_remaining, child_node)
+
 
 
 # attributes (Note: 'play' is our target attribute/class)
@@ -180,61 +233,6 @@ training_data = [ {'id' : 'a', 'outlook' : attributes['outlook'][0],'temperature
                   {'id' : 'm', 'outlook' : attributes['outlook'][1],'temperature' : attributes['temperature'][0],'humidity' : attributes['humidity'][1], 'wind' : attributes['wind'][0], 'play' : attributes['play'][1]},
                   {'id' : 'n', 'outlook' : attributes['outlook'][2],'temperature' : attributes['temperature'][1],'humidity' : attributes['humidity'][0], 'wind' : attributes['wind'][1], 'play' : attributes['play'][0]} ]
 
-#################
-# ID3 algorithm #
-#################
-def ID3(S, attributes_remaining, root_node):
-
-    # create partitions for each attribute and find the best attribute
-    partitions, best_attribute = partition_by_best_attribute(S, attributes_remaining)
-    
-    print(f"\nBest attribute is '{best_attribute}'")     
-
-    attributes_remaining.remove(best_attribute)
-    
-    # create the root node
-    root_node.value = best_attribute 
-
-    print(f"\nAttributes remaining: {attributes_remaining}\n")
-
-    # iterate over each new partition, and test stopping condition for further partitioning
-    for partition in partitions:
-        H = entropy(partitions[partition]) 
-        print(f"Partition: {partition}, Entropy = {H}")
-
-        # stopping conditions: (1) if a partition has entropy = 0, it's a leaf
-        #                      (2) if no more attributes remaining  
-        if(H == 0.0 or len(attributes_remaining) == 0):
-            print("Found a zero entropy partition!")
-            target_vals = []
-            for instance in partitions[partition]:
-                target_vals.append(instance[target_attribute])
-            print(f"target values: {target_vals}")
-
-            # find target attribute value with the highest count
-            max_count = 0
-            max_target_val = None
-            for val in attributes[target_attribute]:
-                if (target_vals.count(val) > max_count):
-                    max_target_val = val
-           
-            # assign target attribute value with the highest count as leaf node
-            leaf = max_target_val
-
-            # add leaf node
-            child_node = TreeNode(value = leaf, branch = partition)
-            root_node.add_child_node(child_node)
-
-        else:
-
-            # add child node
-            child_node = TreeNode(value = partition, branch = partition)
-            root_node.add_child_node(child_node)
-
-            # recursively call ID3 for further partitioning
-            ID3(partitions[partition], attributes_remaining, child_node)
-
-        #print_tree(root)
 
 # set of training instances
 S = training_data
