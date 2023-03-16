@@ -139,6 +139,24 @@ def create_partitions(S, attribute):
     gain_ratio = gain / split_info
     return partitions, gain_ratio    
 
+# function for partioining according to the attribute with largest gain ratio 
+def partition_by_best_attribute(S, attributes_remaining):
+    
+    attribute_partitions = {}
+    max_GR = 0.0
+    best_attribute = None
+    for attribute in attributes_remaining:
+        partitions, gain_ratio = create_partitions(S, attribute)
+        attribute_partitions[attribute] = partitions
+        print(f"{attribute} gain ratio: {gain_ratio}")   
+        if(gain_ratio > max_GR):
+            best_attribute = attribute
+            max_GR = gain_ratio
+
+    partitions = attribute_partitions[best_attribute]
+    return partitions, best_attribute
+
+
 
 # attributes (Note: 'play' is our target attribute/class)
 attributes = { 'outlook' : ['sunny', 'overcast', 'rainy'], 'temperature' : ['hot', 'mild', 'cool'], 'humidity' : ['high', 'normal'], 'wind' : ['weak', 'strong'], 'play' : ['no', 'yes'] }
@@ -168,18 +186,8 @@ training_data = [ {'id' : 'a', 'outlook' : attributes['outlook'][0],'temperature
 def ID3(S, attributes_remaining, root_node):
 
     # create partitions for each attribute and find the best attribute
-    attribute_partitions = {}
-    max_GR = 0.0
-    best_attribute = None
-    for attribute in attributes_remaining:
-        partitions, gain_ratio = create_partitions(S, attribute)
-        attribute_partitions[attribute] = partitions
-        print(f"{attribute} gain ratio: {gain_ratio}")   
-        if(gain_ratio > max_GR):
-            best_attribute = attribute
-            max_GR = gain_ratio
-
-    partitions = attribute_partitions[best_attribute]
+    partitions, best_attribute = partition_by_best_attribute(S, attributes_remaining)
+    
     print(f"\nBest attribute is '{best_attribute}'")     
 
     attributes_remaining.remove(best_attribute)
@@ -239,7 +247,7 @@ print("\n### Building decision tree...\n")
 ID3(S, attributes_remaining, root)
 print("\n### Done!\n")
 
-example_unclassified_instance = {'outlook' : 'rainy','temperature' : 'cool', 'humidity' : 'high', 'wind' : 'strong'}
+example_unclassified_instance = {'outlook' : 'overcast','temperature' : 'cool', 'humidity' : 'high', 'wind' : 'strong'}
 
 print_tree(root_node = root, level = 0)
 classify(example_unclassified_instance, root)
